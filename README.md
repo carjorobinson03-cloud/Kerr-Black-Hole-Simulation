@@ -3,7 +3,7 @@ Python and GLSL simulation of Kerr Black holes.
 
 <img src="Maximal%20Spin,%20Mid%20Temp.png" width="700" alt="Maximal spin, medium temperature regime">
 
-<img src="topdown.png" width="700" alt="Top-down view, maximal spin">
+<img src="topdown2.png" width="700" alt="Top-down view, maximal spin">
 
 <img src="Swarzchild%20Collapse.png" width="700" alt="Schwarzschild collapse">
 
