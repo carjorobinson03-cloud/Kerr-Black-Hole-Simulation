@@ -1,0 +1,9 @@
+cat > .gitignore << 'EOF'
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+starfield.npy
+hygdata_v41.csv
+imgui.ini
+EOF

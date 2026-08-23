@@ -1,5 +1,7 @@
 import math
 import glfw
+import imgui
+from imgui.integrations.glfw import GlfwRenderer
 import numpy as np
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram, compileShader
@@ -14,10 +16,15 @@ void main() {
     // triangle clip space for full screen
     vec2 pos;
 
-    if (gl_VertexID == 0) pos = vec2(-1.0, -1.0);
-    if (gl_VertexID == 1) pos = vec2( 3.0, -1.0);
-    if (gl_VertexID == 2) pos = vec2(-1.0,  3.0);
-
+    if (gl_VertexID == 0){
+        pos = vec2(-1.0, -1.0);
+    } 
+    if (gl_VertexID == 1){
+        pos = vec2( 3.0, -1.0);
+    } 
+    if (gl_VertexID == 2){
+        pos = vec2(-1.0,  3.0);
+    }
     gl_Position = vec4(pos, 0.0, 1.0);
 }
 """
@@ -36,10 +43,10 @@ uniform vec2 resolution;
 uniform float DISC_IN;
 out vec4 fragColor;
 
-const int   MAX_STEPS = 3000; 
-const float H_STEP    = 0.1;
-const float R_ESCAPE  = 120.0;
-const float DISC_OUT  = 20.0;
+const int   MAX_STEPS = 2500; 
+const float H_STEP = 0.1;
+const float R_ESCAPE = 60.0;
+const float DISC_OUT = 20.0;
 uniform sampler1D discTemp;
 uniform sampler1D bbColor;
 uniform float T_LUT_MIN;
@@ -164,7 +171,7 @@ vec4 xdot(state s) {
     float p_y = s.p.z;
     float p_z = s.p.w;
 
-    float r  = solve_r(x,y,z); //stage local, still need to call.
+    float r = solve_r(x,y,z); //stage local, still need to call.
     float f = f_(M, r, a, z);
     float k = k_(r, a, x, y, z, p_t, p_x, p_y, p_z);
 
@@ -398,11 +405,11 @@ vec4 ehat1 () {
 }
 
 vec4 ehat2prime () {
-    float f    = f_(M, r, a, z);
-    float A    = A_hlp(r, a);
-    float N    = N_(a);
-    float D    = D_(a);
-    float lx   = l_x(r, x, y, a);
+    float f = f_(M, r, a, z);
+    float A = A_hlp(r, a);
+    float N = N_(a);
+    float D = D_(a);
+    float lx = l_x(r, x, y, a);
     float omeg = Omega(a);
     vec4 ehp  = ehat1prime(r, x);
     mat4 g = build_metric();
@@ -410,7 +417,7 @@ vec4 ehat2prime () {
     float dscrm = (1.0 + f*lx*lx) + ((f*f*r*r*A*A*x*x) / (D*N));
 
     vec4 g_ymu = g[2];                        
-    vec4 v0    = vec4(1.0, -y*omeg, x*omeg, 0.0);  
+    vec4 v0 = vec4(1.0, -y*omeg, x*omeg, 0.0);  
 
     float s1 = dot(g_ymu, v0);        
     float s2 = s1 / (-(N / D));       
@@ -425,20 +432,20 @@ vec4 ehat2prime () {
 }
 
 vec4 ehat2 () {
-    float f    = f_(M, r, a, z);
-    float A    = A_hlp(r, a);
-    float N    = N_(a);
-    float D    = D_(a);
-    float lx   = l_x(r, x, y, a);
+    float f = f_(M, r, a, z);
+    float A = A_hlp(r, a);
+    float N = N_(a);
+    float D = D_(a);
+    float lx = l_x(r, x, y, a);
     float omeg = Omega(a);
-    vec4 ehp  = ehat1prime(r, x);
+    vec4 ehp = ehat1prime(r, x);
     mat4 g = build_metric();
 
     float dscrm = (1.0 + f*lx*lx) + ((f*f*r*r*A*A*x*x) / (D*N));
 
     vec4 g_ymu = g[2];
-    vec4 v0    = vec4(1.0, -y*omeg, x*omeg, 0.0);
-    vec4 dely  = vec4(0.0, 0.0, 1.0, 0.0);
+    vec4 v0 = vec4(1.0, -y*omeg, x*omeg, 0.0);
+    vec4 dely = vec4(0.0, 0.0, 1.0, 0.0);
 
     float s1 = dot(g_ymu, v0);        
     float s2 = s1 / (-(N / D));
@@ -451,18 +458,18 @@ vec4 ehat2 () {
 }
 
 vec4 ehat3prime() {
-    float f    = f_(M, r, a, z);
-    float A    = A_hlp(r, a);
-    float N    = N_(a);
-    float D    = D_(a);
-    float lx   = l_x(r, x, y, a);
+    float f = f_(M, r, a, z);
+    float A = A_hlp(r, a);
+    float N = N_(a);
+    float D = D_(a);
+    float lx = l_x(r, x, y, a);
     float omeg = Omega(a);
-    vec4 ehp1  = ehat1prime(r, x);
+    vec4 ehp1 = ehat1prime(r, x);
     vec4 ehp2 = ehat2prime();
-    vec4 dely  = vec4(0.0, 0.0, 1.0, 0.0);
+    vec4 dely = vec4(0.0, 0.0, 1.0, 0.0);
     mat4 g = build_metric();
     vec4 g_ymu = g[2];
-    vec4 v0    = vec4(1.0, -y*omeg, x*omeg, 0.0);
+    vec4 v0 = vec4(1.0, -y*omeg, x*omeg, 0.0);
 
     
     float dscrm = (1.0 + f*lx*lx) + ((f*f*r*r*A*A*x*x) / (D*N));
@@ -594,29 +601,30 @@ void main() {
         else if (z_prev * z < 0.0) {
 
             if (r_cross > DISC_IN && r_cross < DISC_OUT) {
-                vec4  pc  = mix(prev_p, s.p, frac);
-                float E   = -pc.x;
-                float Lz  = xc.y*pc.z - xc.z*pc.y;
+                vec4 pc = mix(prev_p, s.p, frac);
+                float E = -pc.x;
+                float Lz = xc.y*pc.z - xc.z*pc.y;
 
                 float u_r = (r_cross - DISC_IN) / (DISC_OUT - DISC_IN);
-                float T   = texture(discTemp, u_r).r;
+                float T = texture(discTemp, u_r).r;
 
-                float g     = redshift(r_cross, E, Lz, M, a);
+                float g = redshift(r_cross, E, Lz, M, a);
                 float T_obs = g * T;
-                float u_T   = clamp((T_obs - T_LUT_MIN) / (T_LUT_MAX - T_LUT_MIN), 0.0, 1.0);
-                vec3  hue   = texture(bbColor, u_T).rgb;
-                float brt   = pow(T_obs / T_peak, 4.0);
+                float u_T = clamp((T_obs - T_LUT_MIN) / (T_LUT_MAX - T_LUT_MIN), 0.0, 1.0);
+                vec3 hue = texture(bbColor, u_T).rgb;
+                float brt = pow(T_obs / T_peak, 4.0);
                 color = hue * brt * exposure;
-                done  = true;
+                done = true;
             }
         }
         // 3) escape to background
         else if (r > R_ESCAPE) {
             //float x, float y, float z, float p_t, float p_x, float p_y, float p_z
             vec3 dir = escapedir(x, y, z, p_t, p_x, p_y, p_z);  
-            color    = texture(starfield, dirToUV(dir)).rgb * 250.0;
+            color = texture(starfield, dirToUV(dir)).rgb * 250.0;
             done = true;
         }
+    }
       
     //  ran out of steps without resolving 
     if (!done) {
@@ -628,7 +636,7 @@ void main() {
     color = sRGB_encode(color);
     fragColor = vec4(color, 1.0);
     }
-}
+
 
 """
 
@@ -673,14 +681,14 @@ def r_ph(M_val, a_val, prograde=True):
 
 def main():
     #physical parameters, update these and image & physics changes.
-    M_val   = 1.0
-    a_val   = 0.0
-    r_camera     = 40.0
+    M_val = 1.0
+    a_val = 0.0
+    r_camera = 40.0
     fov_deg = 40.0
     theta_camera = math.radians(85.0)   # just above the equatorial plane
-    phi_camera   = math.radians(30.0)
+    phi_camera  = math.radians(30.0)
     T_peak = 2000.0 
-    WIDTH, HEIGHT = 1400, 800
+    WIDTH, HEIGHT = 480, 270
 
     if not glfw.init():
         raise RuntimeError("glfw init failed")
@@ -696,6 +704,8 @@ def main():
         raise RuntimeError("window creation failed")
     glfw.make_context_current(window)
     glfw.swap_interval(1) 
+    imgui.create_context()
+    imgui_renderer = GlfwRenderer(window)
 
     program = create_program(vertex_shader, fragment_shader)
 
@@ -705,14 +715,14 @@ def main():
     glUseProgram(program)
 
     sin_t, cos_t = np.sin(theta_camera), np.cos(theta_camera)
-    sin_p, cos_p = np.sin(phi_camera),   np.cos(phi_camera)
+    sin_p, cos_p = np.sin(phi_camera), np.cos(phi_camera)
 
     cam_x = r_camera*sin_t*cos_p - a_val*sin_t*sin_p
     cam_y = r_camera*sin_t*sin_p + a_val*sin_t*cos_p
     cam_z = r_camera*cos_t
 
     tan_half_fov = math.tan(0.5 * math.radians(fov_deg))
-    disc_in   = r_ISCO_prograde(M_val, a_val)
+    disc_in = r_ISCO_prograde(M_val, a_val)
     rph_inner = min(r_ph(M_val, a_val, True), r_ph(M_val, a_val, False))
     rph_outer = max(r_ph(M_val, a_val, True), r_ph(M_val, a_val, False))
     N_r = 1024
@@ -746,11 +756,11 @@ def main():
         glTexImage1D(GL_TEXTURE_1D, 0, internal_fmt, data.shape[0], 0, fmt, GL_FLOAT, data)
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE) 
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE) 
         return tex
 
     tex_disc = make_1d_tex(T_r, GL_R32F, GL_RED)
-    tex_bb   = make_1d_tex(blackbodtoRGB, GL_RGB32F, GL_RGB)
+    tex_bb = make_1d_tex(blackbodtoRGB, GL_RGB32F, GL_RGB)
 
     glActiveTexture(GL_TEXTURE0)
     glBindTexture(GL_TEXTURE_1D, tex_disc)
@@ -784,29 +794,55 @@ def main():
     glViewport(0, 0, fb_w, fb_h)
     glUniform2f(loc("resolution"), float(fb_w), float(fb_h))
 
-    print("rendering frame, may take a sec")
-    glClear(GL_COLOR_BUFFER_BIT)
-    glBindVertexArray(vao)
+    # print("rendering frame, may take a sec")
+    # glClear(GL_COLOR_BUFFER_BIT)
+    # glBindVertexArray(vao)
 
-    glEnable(GL_SCISSOR_TEST)
-    N = 8
-    for i in range(N):
-        x0 = (fb_w * i) // N
-        x1 = (fb_w * (i+1)) // N
-        glScissor(x0, 0, x1 - x0, fb_h)
-        glDrawArrays(GL_TRIANGLES, 0, 3)
-        glFinish()
-        glfw.poll_events()
-        print(f"  strip {i+1}/{N}")
-    glDisable(GL_SCISSOR_TEST)
+    # glEnable(GL_SCISSOR_TEST)
+    # N = 8
+    # for i in range(N):
+    #     x0 = (fb_w * i) // N
+    #     x1 = (fb_w * (i+1)) // N
+    #     glScissor(x0, 0, x1 - x0, fb_h)
+    #     glDrawArrays(GL_TRIANGLES, 0, 3)
+    #     glFinish()
+    #     glfw.poll_events()
+    #     print(f"  strip {i+1}/{N}")
+    # glDisable(GL_SCISSOR_TEST)
 
-    glfw.swap_buffers(window)
-    print("frame done")
+    # glfw.swap_buffers(window)
+    # print("frame done")
+
+    # while not glfw.window_should_close(window):
+    #     glfw.wait_events_timeout(0.1)
+    #     if glfw.get_key(window, glfw.KEY_ESCAPE) == glfw.PRESS:
+    #         glfw.set_window_should_close(window, True)
+
+    print("entering render loop, press ESC to quit")
+
+    test_value = 0.5
 
     while not glfw.window_should_close(window):
-        glfw.wait_events_timeout(0.1)
+        glfw.poll_events()
+        imgui_renderer.process_inputs()
         if glfw.get_key(window, glfw.KEY_ESCAPE) == glfw.PRESS:
             glfw.set_window_should_close(window, True)
+
+        glClear(GL_COLOR_BUFFER_BIT)
+        glUseProgram(program)
+        glUniform1f(loc("a"), a_val)
+        glBindVertexArray(vao)
+        glDrawArrays(GL_TRIANGLES, 0, 3)
+
+        imgui.new_frame()
+        imgui.begin("Controls")
+        changed, a_val = imgui.slider_float("spin (a)", a_val, 0.0, 0.998)
+        imgui.end()
+        imgui.render()
+        imgui_renderer.render(imgui.get_draw_data())
+
+        glfw.swap_buffers(window)
+
 
     glDeleteVertexArrays(1, [vao])
     glDeleteProgram(program)
