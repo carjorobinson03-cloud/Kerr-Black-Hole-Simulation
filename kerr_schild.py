@@ -678,6 +678,18 @@ def r_ph(M_val, a_val, prograde=True):
     s = -1.0 if prograde else 1.0
     return 2.0 * M_val * (1.0 + math.cos((2.0/3.0) * math.acos(s * a_val / M_val)))
 
+def rebuild_disc_temperature(tex_disc, M_val, a_val, T_peak):
+    disc_in = r_ISCO_prograde(M_val, a_val)
+    N_r = 1024
+    r_grid = np.linspace(disc_in, 20.0, N_r)
+    F_tilda = Flux_funcr(r_grid, M_val, a_val, 1.00)
+    T_scale = T_peak / (F_tilda.max()**(1/4))
+    T_r = (F_tilda**(1/4) * T_scale).astype(np.float32)
+
+    glBindTexture(GL_TEXTURE_1D, tex_disc)
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, N_r, 0, GL_RED, GL_FLOAT, T_r)
+
+    return disc_in
 
 def main():
     #physical parameters, update these and image & physics changes.
@@ -721,15 +733,19 @@ def main():
     cam_y = r_camera*sin_t*sin_p + a_val*sin_t*cos_p
     cam_z = r_camera*cos_t
 
+    # tan_half_fov = math.tan(0.5 * math.radians(fov_deg))
+    # disc_in = r_ISCO_prograde(M_val, a_val)
+    # rph_inner = min(r_ph(M_val, a_val, True), r_ph(M_val, a_val, False))
+    # rph_outer = max(r_ph(M_val, a_val, True), r_ph(M_val, a_val, False))
+    # N_r = 1024
+    # r_grid = np.linspace(disc_in, 20.0, N_r) #20.0 is the oter disc edeg, currently its a cosnt float in the shader
+    # F_tilda = Flux_funcr(r_grid, M_val, a_val, 1.00)  
+    # T_scale = T_peak / (F_tilda.max()**(1/4)) 
+    # T_r = (F_tilda**(1/4) * T_scale).astype(np.float32) # Boltzmann
+
     tan_half_fov = math.tan(0.5 * math.radians(fov_deg))
-    disc_in = r_ISCO_prograde(M_val, a_val)
     rph_inner = min(r_ph(M_val, a_val, True), r_ph(M_val, a_val, False))
     rph_outer = max(r_ph(M_val, a_val, True), r_ph(M_val, a_val, False))
-    N_r = 1024
-    r_grid = np.linspace(disc_in, 20.0, N_r) #20.0 is the oter disc edeg, currently its a cosnt float in the shader
-    F_tilda = Flux_funcr(r_grid, M_val, a_val, 1.00)  
-    T_scale = T_peak / (F_tilda.max()**(1/4)) 
-    T_r = (F_tilda**(1/4) * T_scale).astype(np.float32) # Boltzmann
 
     T_LUT_MIN = 1000.0
     T_LUT_MAX = 20000.0
@@ -759,8 +775,10 @@ def main():
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE) 
         return tex
 
-    tex_disc = make_1d_tex(T_r, GL_R32F, GL_RED)
+    tex_disc = make_1d_tex(np.zeros(1024, dtype=np.float32), GL_R32F, GL_RED)
     tex_bb = make_1d_tex(blackbodtoRGB, GL_RGB32F, GL_RGB)
+
+    disc_in = rebuild_disc_temperature(tex_disc, M_val, a_val, T_peak)
 
     glActiveTexture(GL_TEXTURE0)
     glBindTexture(GL_TEXTURE_1D, tex_disc)
@@ -830,16 +848,26 @@ def main():
 
         glClear(GL_COLOR_BUFFER_BIT)
         glUseProgram(program)
+        glUniform1f(loc("M"), M_val)
         glUniform1f(loc("a"), a_val)
+        glUniform1f(loc("DISC_IN"), disc_in)
         glBindVertexArray(vao)
         glDrawArrays(GL_TRIANGLES, 0, 3)
 
         imgui.new_frame()
         imgui.begin("Controls")
-        changed, a_val = imgui.slider_float("spin (a)", a_val, 0.0, 0.998)
+        changed_a, a_val = imgui.slider_float("spin (a)", a_val, 0.0, 0.998 * M_val)
+        changed_M, M_val = imgui.slider_float("mass (M)", M_val, 0.2, 3.0)
         imgui.end()
+
+        a_max = 0.998 * M_val  
+        a_val = min(a_val, a_max)
+        
         imgui.render()
         imgui_renderer.render(imgui.get_draw_data())
+
+        if changed_a or changed_M:
+            disc_in = rebuild_disc_temperature(tex_disc, M_val, a_val, T_peak)
 
         glfw.swap_buffers(window)
 
