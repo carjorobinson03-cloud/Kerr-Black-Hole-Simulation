@@ -726,12 +726,12 @@ def main():
     glBindVertexArray(vao)
     glUseProgram(program)
 
-    sin_t, cos_t = np.sin(theta_camera), np.cos(theta_camera)
-    sin_p, cos_p = np.sin(phi_camera), np.cos(phi_camera)
+    # sin_t, cos_t = np.sin(theta_camera), np.cos(theta_camera)
+    # sin_p, cos_p = np.sin(phi_camera), np.cos(phi_camera)
 
-    cam_x = r_camera*sin_t*cos_p - a_val*sin_t*sin_p
-    cam_y = r_camera*sin_t*sin_p + a_val*sin_t*cos_p
-    cam_z = r_camera*cos_t
+    # cam_x = r_camera*sin_t*cos_p - a_val*sin_t*sin_p
+    # cam_y = r_camera*sin_t*sin_p + a_val*sin_t*cos_p
+    # cam_z = r_camera*cos_t
 
     # tan_half_fov = math.tan(0.5 * math.radians(fov_deg))
     # disc_in = r_ISCO_prograde(M_val, a_val)
@@ -793,9 +793,9 @@ def main():
     glUniform1f(loc("M"), M_val)
     glUniform1f(loc("a"), a_val)
     glUniform1f(loc("tanHalfFov"), tan_half_fov)
-    glUniform1f(loc("cam_x"), cam_x)
-    glUniform1f(loc("cam_y"), cam_y)
-    glUniform1f(loc("cam_z"), cam_z)
+    # glUniform1f(loc("cam_x"), cam_x)
+    # glUniform1f(loc("cam_y"), cam_y)
+    # glUniform1f(loc("cam_z"), cam_z)
     glUniform1f(loc("DISC_IN"), disc_in)
     glUniform1f(loc("inner_photon_orbit"), rph_inner)
     glUniform1f(loc("outer_photon_orbit"), rph_outer)
@@ -839,18 +839,41 @@ def main():
     print("entering render loop, press ESC to quit")
 
     test_value = 0.5
+    last_mouse_x, last_mouse_y = glfw.get_cursor_pos(window)
 
     while not glfw.window_should_close(window):
         glfw.poll_events()
         imgui_renderer.process_inputs()
+
+        mouse_x, mouse_y = glfw.get_cursor_pos(window)
+        dx = mouse_x - last_mouse_x
+        dy = mouse_y - last_mouse_y
+        last_mouse_x, last_mouse_y = mouse_x, mouse_y
+
+        left_button_down = glfw.get_mouse_button(window, glfw.MOUSE_BUTTON_LEFT) == glfw.PRESS
+        if left_button_down and not imgui.get_io().want_capture_mouse:
+            orbit_speed = 0.005
+            phi_camera += dx * orbit_speed
+            theta_camera -= dy * orbit_speed
+            theta_camera = max(0.05, min(math.pi - 0.05, theta_camera))
         if glfw.get_key(window, glfw.KEY_ESCAPE) == glfw.PRESS:
             glfw.set_window_should_close(window, True)
 
         glClear(GL_COLOR_BUFFER_BIT)
         glUseProgram(program)
+
+        sin_t, cos_t = math.sin(theta_camera), math.cos(theta_camera)
+        sin_p, cos_p = math.sin(phi_camera), math.cos(phi_camera)
+        cam_x = r_camera*sin_t*cos_p - a_val*sin_t*sin_p
+        cam_y = r_camera*sin_t*sin_p + a_val*sin_t*cos_p
+        cam_z = r_camera*cos_t
+
         glUniform1f(loc("M"), M_val)
         glUniform1f(loc("a"), a_val)
         glUniform1f(loc("DISC_IN"), disc_in)
+        glUniform1f(loc("cam_x"), cam_x)
+        glUniform1f(loc("cam_y"), cam_y)
+        glUniform1f(loc("cam_z"), cam_z)
         glBindVertexArray(vao)
         glDrawArrays(GL_TRIANGLES, 0, 3)
 
@@ -862,7 +885,7 @@ def main():
 
         a_max = 0.998 * M_val  
         a_val = min(a_val, a_max)
-        
+
         imgui.render()
         imgui_renderer.render(imgui.get_draw_data())
 
