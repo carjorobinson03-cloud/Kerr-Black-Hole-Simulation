@@ -571,20 +571,26 @@ void main() {
     vec3 color = vec3(0.0);
     bool done = false;
     state s = init_momentum();
+    float r = solve_r(s.x.y, s.x.z, s.x.w);
+
 
     for (int i = 0; i < MAX_STEPS && !done; i++) {
+        
+        //ADDED, poor mans adaptive stepping.
+        float h;
+        if (r > 5.0) h = 3.0;
+        else h = H_STEP;
+        
         vec4  prev_x = s.x;
         vec4  prev_p = s.p;
         float z_prev = s.x.w;
-        s = rk4step(s, H_STEP);
+
+        
+        s = rk4step(s, h);
         x = s.x.y;  y = s.x.z;  z = s.x.w;
         float p_t = s.p.x, p_x = s.p.y, p_y = s.p.z, p_z = s.p.w;
         r = solve_r(x, y, z);
 
-        float frac = z_prev / (z_prev - z);
-        vec4  xc = mix(prev_x, s.x, frac);
-        float rho2 = xc.y*xc.y + xc.z*xc.z;
-        float r_cross = sqrt(max(rho2 - a*a, 0.0)); //interpolate crossing radius
 
         //nan guard, realistically theyve hit the horizon if they land here.
         if (isnan(r) || isinf(r)) {
@@ -599,6 +605,12 @@ void main() {
 
         // Disc
         else if (z_prev * z < 0.0) {
+            
+            //MOVED, frac, xc, rho2, r_cross into this elif branch to save a little computation.
+            float frac = z_prev / (z_prev - z);
+            vec4  xc = mix(prev_x, s.x, frac);
+            float rho2 = xc.y*xc.y + xc.z*xc.z;
+            float r_cross = sqrt(max(rho2 - a*a, 0.0)); //interpolate crossing radius
 
             if (r_cross > DISC_IN && r_cross < DISC_OUT) {
                 vec4 pc = mix(prev_p, s.p, frac);
@@ -695,12 +707,12 @@ def main():
     #physical parameters, update these and image & physics changes.
     M_val = 1.0
     a_val = 0.0
-    r_camera = 40.0
+    r_camera = 50.0
     fov_deg = 40.0
     theta_camera = math.radians(85.0)   # just above the equatorial plane
     phi_camera  = math.radians(30.0)
-    T_peak = 2000.0 
-    WIDTH, HEIGHT = 480, 270
+    T_peak = 14000.0 
+    WIDTH, HEIGHT = 720, 480
 
     if not glfw.init():
         raise RuntimeError("glfw init failed")
