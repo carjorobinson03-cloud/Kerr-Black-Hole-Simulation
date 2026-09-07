@@ -7,7 +7,8 @@ from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram, compileShader
 from colour import Flux_funcr, bb_to_rgb
 
-
+r_camera = 50.0
+scroll = None
 vertex_shader = """
 #version 330 core
 
@@ -703,11 +704,21 @@ def rebuild_disc_temperature(tex_disc, M_val, a_val, T_peak):
 
     return disc_in
 
+def scroll_callback(window, xoffset, yoffset):
+    global r_camera
+    if scroll:
+        scroll(window, xoffset, yoffset)
+
+    zoom_speed = 2.0
+    r_camera -= yoffset * zoom_speed
+    r_camera = max(8.0, min(50.0, r_camera))
+
 def main():
+    global r_camera
     #physical parameters, update these and image & physics changes.
     M_val = 1.0
     a_val = 0.0
-    r_camera = 50.0
+    #r_camera = 50.0
     fov_deg = 40.0
     theta_camera = math.radians(85.0)   # just above the equatorial plane
     phi_camera  = math.radians(30.0)
@@ -730,6 +741,9 @@ def main():
     glfw.swap_interval(1) 
     imgui.create_context()
     imgui_renderer = GlfwRenderer(window)
+
+    global scroll
+    scroll = glfw.set_scroll_callback(window, scroll_callback)
 
     program = create_program(vertex_shader, fragment_shader)
 
@@ -802,7 +816,6 @@ def main():
     def loc(name):
         return glGetUniformLocation(program, name)
 
-    glUniform1f(loc("M"), M_val)
     glUniform1f(loc("a"), a_val)
     glUniform1f(loc("tanHalfFov"), tan_half_fov)
     # glUniform1f(loc("cam_x"), cam_x)
@@ -850,7 +863,6 @@ def main():
 
     print("entering render loop, press ESC to quit")
 
-    test_value = 0.5
     last_mouse_x, last_mouse_y = glfw.get_cursor_pos(window)
 
     while not glfw.window_should_close(window):
@@ -870,6 +882,10 @@ def main():
             theta_camera = max(0.05, min(math.pi - 0.05, theta_camera))
         if glfw.get_key(window, glfw.KEY_ESCAPE) == glfw.PRESS:
             glfw.set_window_should_close(window, True)
+        if glfw.get_key(window, glfw.KEY_EQUAL) == glfw.PRESS:
+            r_camera = max(8.0, r_camera - 0.5)
+        if glfw.get_key(window, glfw.KEY_MINUS) == glfw.PRESS:
+            r_camera = min(50.0, r_camera + 0.5)
 
         glClear(GL_COLOR_BUFFER_BIT)
         glUseProgram(program)
@@ -891,8 +907,7 @@ def main():
 
         imgui.new_frame()
         imgui.begin("Controls")
-        changed_a, a_val = imgui.slider_float("spin (a)", a_val, 0.0, 0.998 * M_val)
-        changed_M, M_val = imgui.slider_float("mass (M)", M_val, 0.2, 3.0)
+        changed_a, a_val = imgui.slider_float("spin (a)", a_val, 0.0, 0.998)
         imgui.end()
 
         a_max = 0.998 * M_val  
@@ -901,7 +916,7 @@ def main():
         imgui.render()
         imgui_renderer.render(imgui.get_draw_data())
 
-        if changed_a or changed_M:
+        if changed_a:
             disc_in = rebuild_disc_temperature(tex_disc, M_val, a_val, T_peak)
 
         glfw.swap_buffers(window)
