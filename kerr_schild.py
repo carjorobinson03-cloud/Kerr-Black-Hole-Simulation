@@ -740,6 +740,33 @@ def main():
     glfw.make_context_current(window)
     glfw.swap_interval(1) 
     imgui.create_context()
+    style = imgui.get_style()
+    style.window_rounding = 8.0
+    style.frame_rounding = 6.0
+    style.grab_rounding = 6.0
+    style.window_padding = (10, 10)
+    style.frame_padding = (8, 8)
+    style.item_spacing = (10, 12)
+    style.item_inner_spacing = (12, 6)
+
+    colors = style.colors
+    colors[imgui.COLOR_WINDOW_BACKGROUND] = (0.03, 0.03, 0.03, 0.90)
+    colors[imgui.COLOR_TITLE_BACKGROUND] = (0.0, 0.0, 0.0, 1.0)
+    colors[imgui.COLOR_TITLE_BACKGROUND_ACTIVE] = (0.08, 0.08, 0.08, 1.0)
+    colors[imgui.COLOR_FRAME_BACKGROUND] = (0.10, 0.10, 0.10, 1.0)
+    colors[imgui.COLOR_FRAME_BACKGROUND_HOVERED] = (0.16, 0.16, 0.16, 1.0)
+    colors[imgui.COLOR_FRAME_BACKGROUND_ACTIVE] = (0.16, 0.16, 0.16, 1.0)
+    colors[imgui.COLOR_SLIDER_GRAB] = (0.16, 0.22, 0.40, 1.0)
+    colors[imgui.COLOR_SLIDER_GRAB_ACTIVE] = (0.16, 0.22, 0.40, 1.0)
+
+    io = imgui.get_io()
+    font_path = "/System/Library/Fonts/Supplemental/Arial.ttf"
+    io.fonts.clear()
+    io.fonts.add_font_from_file_ttf(font_path, 11.5)
+
+    imgui_renderer = GlfwRenderer(window)
+    imgui_renderer.refresh_font_texture()
+
     imgui_renderer = GlfwRenderer(window)
 
     global scroll
@@ -907,9 +934,21 @@ def main():
         glDrawArrays(GL_TRIANGLES, 0, 3)
 
         imgui.new_frame()
-        imgui.begin("Controls")
-        changed_a, a_val = imgui.slider_float("spin (a)", a_val, 0.0, 0.998)
-        changed_T, T_peak = imgui.slider_float("peak temp (K)", T_peak, 1000.0, 20000.0)
+        imgui.set_next_window_size(220, 0)
+        imgui.begin("Controls", flags=imgui.WINDOW_NO_RESIZE)
+        imgui.push_item_width(100)
+
+        imgui.align_text_to_frame_padding()
+        imgui.text("Spin (a)")
+        imgui.same_line(95)
+        changed_a, a_val = imgui.slider_float("##spin", a_val, 0.0, 0.998, "%.2f")
+
+        imgui.align_text_to_frame_padding()
+        imgui.text("Peak temp (K)")
+        imgui.same_line(95)
+        changed_T, T_peak = imgui.slider_float("##temp", T_peak, 1000.0, 20000.0, "%.0f")
+
+        imgui.pop_item_width()
         imgui.end()
 
         a_max = 0.998 * M_val  
