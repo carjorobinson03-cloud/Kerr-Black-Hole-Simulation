@@ -898,6 +898,7 @@ def main():
 
         glUniform1f(loc("M"), M_val)
         glUniform1f(loc("a"), a_val)
+        glUniform1f(loc("T_peak"), T_peak)
         glUniform1f(loc("DISC_IN"), disc_in)
         glUniform1f(loc("cam_x"), cam_x)
         glUniform1f(loc("cam_y"), cam_y)
@@ -908,6 +909,7 @@ def main():
         imgui.new_frame()
         imgui.begin("Controls")
         changed_a, a_val = imgui.slider_float("spin (a)", a_val, 0.0, 0.998)
+        changed_T, T_peak = imgui.slider_float("peak temp (K)", T_peak, 1000.0, 20000.0)
         imgui.end()
 
         a_max = 0.998 * M_val  
@@ -916,7 +918,7 @@ def main():
         imgui.render()
         imgui_renderer.render(imgui.get_draw_data())
 
-        if changed_a:
+        if changed_a or changed_T:
             disc_in = rebuild_disc_temperature(tex_disc, M_val, a_val, T_peak)
 
         glfw.swap_buffers(window)
