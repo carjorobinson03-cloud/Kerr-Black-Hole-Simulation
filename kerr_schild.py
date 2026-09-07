@@ -938,6 +938,8 @@ def main():
         imgui.begin("Controls", flags=imgui.WINDOW_NO_RESIZE)
         imgui.push_item_width(100)
 
+        imgui.text_colored("Drag to orbit  //  Scroll to zoom", 0.40, 0.40, 0.40, 1.0)
+
         imgui.align_text_to_frame_padding()
         imgui.text("Spin (a)")
         imgui.same_line(95)
@@ -950,6 +952,8 @@ def main():
 
         imgui.pop_item_width()
         imgui.end()
+
+        
 
         a_max = 0.998 * M_val  
         a_val = min(a_val, a_max)
