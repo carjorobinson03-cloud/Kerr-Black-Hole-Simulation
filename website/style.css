@@ -1,0 +1,123 @@
+:root{
+    --bg: #060608;
+    --white: #f0eee8;
+    --light-grey: #a8a6a0;
+    --dark-grey: #6b6a68;
+    --orange: #ff9d54;
+    --dark-orange: #c2410c;
+    --blue: #d8e6ff;
+    --line: #1c1c22;
+
+    --serif: 'Fraunces', Georgia, serif;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'Inter', -apple-system, sans-serif;
+}
+
+*{
+    box-sizing:border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    background: var(--bg);
+    color: var(--white);
+    font-family: var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+}
+
+.wrap{
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 28px;
+}
+
+nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(6, 6, 8, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom:1px solid var(--line);
+}
+  
+.nav-mark{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--light-grey);
+    letter-spacing:0.02em;
+}
+
+nav .wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height:56px;
+}
+
+.nav-links{
+    display:flex;
+    gap:28px;
+    list-style:none;
+    font-size:0.875rem;
+}
+
+.nav-links a{
+    text-decoration:none;
+    color:var(--light-grey);
+    transition:color 0.15s;
+}
+
+.nav-links a:hover{
+    color:var(--white);
+}
+
+.hero{
+    position:relative;
+    height:78vh;
+    min-height:520px;
+    display:flex;
+    align-items:flex-end;
+    overflow:hidden;
+    border-bottom:1px solid var(--line);
+}
+  
+.hero-bg{
+    position:absolute;
+    inset:0;
+    background-image:url('assets/herohole.png');
+    background-size:cover;
+    background-position:center;
+    filter:blur(10px);
+    transform:scale(1.1);
+}
+  
+.hero-overlay{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(to top, var(--bg) 5%, rgba(6,6,8,0.4) 60%, rgba(6,6,8,0.75));
+}
+  
+.hero-content{
+    position:relative;
+    z-index:2;
+    width:100%;
+    padding-bottom:4rem;
+}
+
+h1{
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:clamp(2.4rem, 5.5vw, 4.4rem);
+    line-height:1.06;
+    letter-spacing:-0.01em;
+    max-width:15ch;
+}
+
+.hero-sub{
+    margin-top:1.5rem;
+    max-width:50ch;
+    font-size:1.0625rem;
+    color:var(--light-grey);
+}
