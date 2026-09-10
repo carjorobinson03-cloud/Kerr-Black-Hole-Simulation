@@ -148,3 +148,54 @@ p + p{
 .text{
     max-width: 62ch;
 }
+
+h3{
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 1.2rem;
+    margin-top: 2.75rem;
+    margin-bottom: 0.625rem;
+}
+
+.log-entry{
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 1.5rem;
+    padding: 1.75rem 0;
+    border-top: 1px solid var(--line);
+}
+  
+.log-entry:first-child{
+    border-top: none;
+}
+  
+.log-entry h3{
+    margin-top: 0;
+}
+  
+.log-date{
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--dark-grey);
+    padding-top: 0.125rem;
+}
+
+.gallery{
+    margin-top: 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.875rem;
+}
+  
+.gallery-item{
+    aspect-ratio: 16/10;
+    border-radius: 6px;
+    border: 1px dashed var(--line);
+    background: var(--bg);
+}
+  
+@media (max-width:640px){
+    .gallery{
+      grid-template-columns: 1fr;
+    }
+}
