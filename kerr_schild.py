@@ -6,6 +6,7 @@ import numpy as np
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram, compileShader
 from colour import Flux_funcr, bb_to_rgb
+import os
 
 r_camera = 50.0
 scroll = None
@@ -760,9 +761,12 @@ def main():
     colors[imgui.COLOR_SLIDER_GRAB_ACTIVE] = (0.16, 0.22, 0.40, 1.0)
 
     io = imgui.get_io()
-    font_path = "/System/Library/Fonts/Supplemental/Arial.ttf"
-    io.fonts.clear()
-    io.fonts.add_font_from_file_ttf(font_path, 11.5)
+    font_path = "fonts/Inter-Regular.ttf"
+    if os.path.exists(font_path):
+        io.fonts.clear()
+        io.fonts.add_font_from_file_ttf(font_path, 11.5)
+    else:
+        print(f"err: font not found at {font_path}, using default")
 
     imgui_renderer = GlfwRenderer(window)
     imgui_renderer.refresh_font_texture()
