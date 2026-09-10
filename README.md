@@ -1,11 +1,11 @@
 # Kerr-Black-Hole-Simulation
 Python and GLSL simulation of Kerr Black holes. 
 
-<img src="Maximal%20Spin,%20Mid%20Temp.png" width="700" alt="Maximal spin, medium temperature regime">
+<img src="assets/images/Maximal%20Spin,%20Mid%20Temp.png" width="700" alt="Maximal spin, medium temperature regime">
 
-<img src="topdown2.png" width="700" alt="Top-down view, maximal spin">
+<img src="assets/images/topdown2.png" width="700" alt="Top-down view, maximal spin">
 
-<img src="Swarzchild%20Collapse.png" width="700" alt="Schwarzschild collapse">
+<img src="assets/images/Swarzchild%20Collapse.png" width="700" alt="Schwarzschild collapse">
 
 Null geodesic integration via RK4 over an affine parameter. The integrator uses
 Kerr–Schild coordinates with a Boyer–Lindquist fallback, with geodesics
