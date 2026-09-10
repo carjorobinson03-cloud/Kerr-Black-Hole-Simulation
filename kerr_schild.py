@@ -761,7 +761,7 @@ def main():
     colors[imgui.COLOR_SLIDER_GRAB_ACTIVE] = (0.16, 0.22, 0.40, 1.0)
 
     io = imgui.get_io()
-    font_path = "fonts/Inter-Regular.ttf"
+    font_path = "assets/fonts/Inter-Regular.ttf"
     if os.path.exists(font_path):
         io.fonts.clear()
         io.fonts.add_font_from_file_ttf(font_path, 11.5)
