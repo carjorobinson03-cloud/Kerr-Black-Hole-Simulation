@@ -28,7 +28,7 @@
             <div class="wrap hero-content">
                 <h1>Building a black hole simulator.</h1>
                 <p class="hero-sub">
-                    lil description
+                    A physical representation of spinning black holes.
                 </p>
             </div>
         </div>
@@ -37,7 +37,34 @@
             <div class="wrap">
                 <h2>The physics</h2>
                 <p class="text">
-                    Carter physics explanation shi
+                    Spinning black holes are likely to make up most of the astrophysical black holes in the universe. 
+                    These spinning black holes are represented by the Kerr metric, discovered by Roy Kerr in 1963. This simulation uses
+                    The Kerr metric in Kerr-Schild coordinates in natural units. Represented by:
+                    *Insert The equation in here idk how to use LaTeX in html*
+                    This equation represents how the worldline (path through spacetime) of matter or light is affected
+                    by spinning mass. 
+
+                    The following simulation is composed by initializing every stage pixel as a photon from a ZAMO (zero angular
+                    momentum observer) and taking a locally minkowski, or flat, spacetime to seed the initial conditions of an rk4 
+                    integrator. the integrand is taken as a state 8 - vector comprised of the 4-velocity and the covariant 4-momentum,
+                    also known as the phase space. And colourized using the final position of the photon over the affine permater lambda.
+
+                    Photon oribts are considered for only prograde motion. Superimposing prograde and retrograde orbits would not give 
+                    visible difference on the accretion disc as the prograde orbits extend closer to the shadow than the retrograde
+                    orbits. 
+
+                    Disc mechanics use Bardeen, Press, Teukolsky (1973) for the inner extent of the disc and the Energy as well as angular
+                    Momentum functions. Remembering that E & L are conserved via Killing fields in Kerr spacetime. The E & L equations are used
+                    in deriving the flux - energy profile for the accretion disc using Novikov & Thorne (1973) model. The colour science 
+                    is then done across the disc in a nodular approach using Wyman, Sloan & Shirley, (2013) with CIE (2004). 
+
+                    Redhsifting is calculated by dividing observed frequency by emitted frequency, which also factors doppler beaming in 
+                    Kerr spacetime, giving the excellent brightspots and darker spots expected of orbiting disc material.
+
+                    Background starfield is textured against the HYG database starfield using normalized escape directions of photons 
+                    bypassing the black hole. This method produces the Einstein ring excellently well.
+        
+            
                 </p>
 
                 <h3>How it runs</h3>
